@@ -14,4 +14,6 @@ torch.abs(box_predictions[..., 2:4]) + 1e-6) # width and height may have negativ
 //to avoide the error we has use absolute value and using sign because after sqrt the sign will diminish.
 box_target[..., 2:4] = torch.sqrt(box_target[..., 2:4]) # target will not have negative (ofcourse).
 
+
+
 All I learned this from Aladdin Persson
