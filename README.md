@@ -9,9 +9,13 @@ There are some results on the test data.
 An inplace operation in the loss function.
 
 //loss for the width and height is SUM( (root(h) - root(h^))^2 + (root(w) - root(w^))^2 )
+
 box_predictions[..., 2:4] = torch.sign(box_predictions[..., 2:4]) * torch.sqrt(
-torch.abs(box_predictions[..., 2:4]) + 1e-6) # width and height may have negative values in starting
+torch.abs(box_predictions[..., 2:4]) + 1e-6) 
+
+//width and height may have negative values in starting
 //to avoide the error we has use absolute value and using sign because after sqrt the sign will diminish.
+
 box_target[..., 2:4] = torch.sqrt(box_target[..., 2:4]) # target will not have negative (ofcourse).
 
 
