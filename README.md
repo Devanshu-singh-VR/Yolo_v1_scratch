@@ -20,4 +20,8 @@ box_target[..., 2:4] = torch.sqrt(box_target[..., 2:4]) # target will not have n
 
 
 
+
+
+
+
 All I learned this from Aladdin Persson
