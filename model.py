@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-architecture_config = [
+architecture_yolo = [
     (7, 64, 2, 3),
     "M",
     (3, 192, 1, 1),
@@ -37,25 +37,23 @@ class CNNBlock(nn.Module):
 class Yolo(nn.Module):
     def __init__(self, in_channels=3, **kwargs):
         super(Yolo, self).__init__()
-        self.architecture = architecture_config
+        self.architecture = architecture_yolo
         self.in_channels = in_channels
-        self.darknet = self._create_conv_layers(self.architecture)
-        self.fcs = self._create_fcs(**kwargs)
+        self.darknet = self.conv_layers(self.architecture)
+        self.fcs = self.fully_connected(**kwargs)
 
     def forward(self, x):
         x = self.darknet(x)
         return self.fcs(torch.flatten(x, start_dim=1))
 
-    def _create_conv_layers(self, architecture):
+    def conv_layers(self, architecture):
         layers = []
         in_channels = self.in_channels
 
         for x in architecture:
             if type(x) == tuple:
                 layers += [
-                    CNNBlock(
-                        in_channels, x[1], kernel_size=x[0], stride=x[2], padding=x[3],
-                    )
+                    CNNBlock(in_channels, x[1], kernel_size=x[0], stride=x[2], padding=x[3])
                 ]
                 in_channels = x[1]
 
@@ -69,28 +67,18 @@ class Yolo(nn.Module):
 
                 for _ in range(num_repeats):
                     layers += [
-                        CNNBlock(
-                            in_channels,
-                            conv1[1],
-                            kernel_size=conv1[0],
-                            stride=conv1[2],
-                            padding=conv1[3],
-                        )
+                        CNNBlock(in_channels, conv1[1], kernel_size=conv1[0], stride=conv1[2], padding=conv1[3])
                     ]
+
                     layers += [
-                        CNNBlock(
-                            conv1[1],
-                            conv2[1],
-                            kernel_size=conv2[0],
-                            stride=conv2[2],
-                            padding=conv2[3],
-                        )
+                        CNNBlock(conv1[1], conv2[1], kernel_size=conv2[0], stride=conv2[2], padding=conv2[3])
                     ]
+
                     in_channels = conv2[1]
 
         return nn.Sequential(*layers)
 
-    def _create_fcs(self, split_size, num_boxes, num_classes):
+    def fully_connected(self, split_size, num_boxes, num_classes):
         S, B, C = split_size, num_boxes, num_classes
         return nn.Sequential(
             nn.Flatten(),
